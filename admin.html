@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Logger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+    <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">Scout Activity Logger</h1>
+        <p class="text-center text-gray-500 mb-6">Log a completed activity for a group.</p>
+        
+        <div class="space-y-4">
+            <div>
+                <label for="scoutGroup" class="block text-sm font-medium text-gray-700">Select Group:</label>
+                <select id="scoutGroup" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                    <!-- ADD YOUR SCOUT GROUP NAMES HERE -->
+                    <option>Louveteaux</option>
+                    <option>Louvettes</option>
+                    <option>Lionceaux</option>
+                    <option>Lioncelles</option>
+                    <option>Eclaireurs</option>
+                    <option>Eclaireuses</option>
+                    <option>Partisans</option>
+                    <option>Partisanes</option>
+                </select>
+            </div>
+            
+            <button id="logButton" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-150">
+                Log Activity
+            </button>
+        </div>
+`
+        <div id="feedbackMessage" class="mt-4 text-center text-green-600 font-medium h-5"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBAwOJf4BzFPAvFsghjS90_J5I3YWhyA8A",
+            authDomain: "scout-bri.firebaseapp.com",
+            projectId: "scout-bri",
+            storageBucket: "scout-bri.firebasestorage.app",
+            messagingSenderId: "98896308443",
+            appId: "1:98896308443:web:c6e7b7a0a420aede15c4fe"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // DOM Elements
+        const logButton = document.getElementById('logButton');
+        const scoutGroupSelect = document.getElementById('scoutGroup');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+
+        logButton.addEventListener('click', async () => {
+            const groupName = scoutGroupSelect.value;
+            if (!groupName) {
+                alert("Please select a group!");
+                return;
+            }
+
+            try {
+                // Disable button to prevent multiple clicks
+                logButton.disabled = true;
+                logButton.textContent = 'Logging...';
+
+                // Add a new document with a generated id.
+                const docRef = await addDoc(collection(db, "activities"), {
+                    group: groupName,
+                    timestamp: serverTimestamp() // Use server's timestamp for accuracy
+                });
+                
+                console.log("Document written with ID: ", docRef.id);
+                
+                // Show success feedback
+                feedbackMessage.textContent = `Activity logged for ${groupName}!`;
+                setTimeout(() => {
+                    feedbackMessage.textContent = '';
+                }, 3000);
+
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                feedbackMessage.textContent = 'Error logging activity.';
+                feedbackMessage.classList.remove('text-green-600');
+                feedbackMessage.classList.add('text-red-600');
+                 setTimeout(() => {
+                    feedbackMessage.textContent = '';
+                    feedbackMessage.classList.remove('text-red-600');
+                    feedbackMessage.classList.add('text-green-600');
+                }, 3000);
+            } finally {
+                // Re-enable button
+                logButton.disabled = false;
+                logButton.textContent = 'Log Activity';
+            }
+        });
+    </script>
+</body>
+</html>

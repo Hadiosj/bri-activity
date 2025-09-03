@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VILLAINCOM_SECURE_TERMINAL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #0a0a0a;
+            color: #00ff41;
+            text-shadow: 0 0 5px #00ff41, 0 0 10px #00ff41;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .container-glow {
+            border: 1px solid #00ff41;
+            box-shadow: 0 0 15px #00ff41, inset 0 0 10px #00ff4133;
+            background-color: rgba(0, 255, 65, 0.05);
+        }
+        .progress-bar-glow {
+            box-shadow: 0 0 15px #ff0000, 0 0 25px #ff0000;
+            transition: width 1s ease-out;
+        }
+        .glitch {
+            animation: glitch 1.5s linear infinite;
+        }
+        @keyframes glitch {
+            2%, 64% { transform: translate(2px, 0) skew(0deg); }
+            4%, 60% { transform: translate(-2px, 0) skew(0deg); }
+            62% { transform: translate(0, 0) skew(5deg); }
+        }
+        .scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 70%, rgba(255,255,255,0.1));
+            background-size: 100% 4px;
+            animation: scan 7s linear infinite;
+        }
+        @keyframes scan {
+            from { background-position: 0 0; }
+            to { background-position: 0 -400px; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 relative overflow-hidden">
+    <div class="scanline"></div>
+    <div class="max-w-4xl mx-auto">
+        
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="font-orbitron text-3xl md:text-5xl lg:text-6xl text-red-500 glitch" style="text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;">[//VILLAIN_COM//]</h1>
+            <p class="text-lg text-red-400" style="text-shadow: 0 0 5px #ff0000;">Scout Activity Monitor - Sector 7G</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container-glow rounded-lg p-4 md:p-6 space-y-6">
+
+            <!-- Progress Section -->
+            <div>
+                <h2 class="font-orbitron text-xl md:text-2xl mb-3">PRESENCE DETECTED:</h2>
+                <div class="w-full bg-red-900/50 rounded-full h-8 md:h-10 border-2 border-red-500/50">
+                    <div id="progressBar" class="bg-red-600 h-full rounded-full progress-bar-glow text-right pr-4 text-white font-bold text-lg flex items-center justify-end" style="width: 0%">
+                        <span id="progressText">0%</span>
+                    </div>
+                </div>
+                <p id="statusText" class="text-center mt-2 text-yellow-400 animate-pulse text-lg" style="text-shadow: 0 0 5px #facc15;">SYSTEM STATUS: Center appears empty... for now.</p>
+            </div>
+
+            <!-- Activity Log Section -->
+            <div>
+                <h2 class="font-orbitron text-xl md:text-2xl mb-3">> INTRUSION LOG_</h2>
+                <div id="activityLog" class="h-64 md:h-80 overflow-y-auto bg-black/50 p-3 rounded-md border border-green-500/50 space-y-2">
+                    <!-- Activity items will be injected here by JavaScript -->
+                    <p class="text-gray-500">Awaiting network traffic...</p>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center mt-6 text-sm text-green-800">
+            <p>V-OS v3.14 | SECURE_CONNECTION [ESTABLISHED]</p>
+        </footer>
+
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBAwOJf4BzFPAvFsghjS90_J5I3YWhyA8A",
+            authDomain: "scout-bri.firebaseapp.com",
+            projectId: "scout-bri",
+            storageBucket: "scout-bri.firebasestorage.app",
+            messagingSenderId: "98896308443",
+            appId: "1:98896308443:web:c6e7b7a0a420aede15c4fe"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // DOM Elements
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const statusText = document.getElementById('statusText');
+        const activityLog = document.getElementById('activityLog');
+
+        const TOTAL_ACTIVITIES_GOAL = 20; // <--- SET YOUR GOAL FOR THE DAY HERE
+
+        // Real-time listener for activities
+        const q = query(collection(db, "activities"), orderBy("timestamp", "desc"));
+
+        onSnapshot(q, (querySnapshot) => {
+            const activities = [];
+            querySnapshot.forEach((doc) => {
+                activities.push(doc.data());
+            });
+            
+            updateUI(activities);
+        });
+
+        function updateUI(activities) {
+            // Update Progress Bar
+            const activityCount = activities.length;
+            let percentage = Math.min(100, (activityCount / TOTAL_ACTIVITIES_GOAL) * 100);
+            
+            progressBar.style.width = percentage + '%';
+            progressText.textContent = Math.round(percentage) + '%';
+
+            // Update Status Text
+            if (percentage < 30) {
+                statusText.textContent = "SYSTEM STATUS: Minimal energy signatures detected. Probably just squirrels.";
+            } else if (percentage < 70) {
+                statusText.textContent = "WARNING: Coordinated activity detected. Raising alert level.";
+            } else if (percentage < 100) {
+                statusText.textContent = "SYSTEM ALERT: Center is fully active! My plans are in jeopardy!";
+            } else {
+                statusText.textContent = "!! INFILTRATION FAILED !! - They're back... and they're prepared.";
+                statusText.classList.remove('animate-pulse', 'text-yellow-400');
+                statusText.classList.add('text-red-500', 'font-bold', 'glitch');
+            }
+
+            // Update Activity Log
+            activityLog.innerHTML = ''; // Clear the log
+            if (activities.length === 0) {
+                 activityLog.innerHTML = '<p class="text-gray-500">Awaiting network traffic...</p>';
+                 return;
+            }
+            activities.forEach(activity => {
+                const logEntry = document.createElement('p');
+                const date = activity.timestamp.toDate();
+                const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                logEntry.innerHTML = `[<span class="text-yellow-400">${timeString}</span>] <span class="text-cyan-400">${activity.group}</span> logged a new activity. Threat index increasing...`;
+                activityLog.appendChild(logEntry);
+            });
+        }
+    </script>
+</body>
+</html>
