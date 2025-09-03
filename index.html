@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VILLAINCOM_SECURE_TERMINAL</title>
+    <title>TERMINAL_SÉCURISÉ_VILLAINCOM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,8 +58,8 @@
         
         <!-- Header -->
         <header class="text-center mb-8">
-            <h1 class="font-orbitron text-3xl md:text-5xl lg:text-6xl text-red-500 glitch" style="text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;">[//VILLAIN_COM//]</h1>
-            <p class="text-lg text-red-400" style="text-shadow: 0 0 5px #ff0000;">Scout Activity Monitor - Sector 7G</p>
+            <h1 class="font-orbitron text-3xl md:text-5xl lg:text-6xl text-red-500 glitch" style="text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;">[X SCOUT AM X]</h1>
+            <p class="text-lg text-red-400" style="text-shadow: 0 0 5px #ff0000;">Moniteur d'Activité Scout - Secteur AG - 93100</p>
         </header>
 
         <!-- Main Content -->
@@ -67,27 +67,27 @@
 
             <!-- Progress Section -->
             <div>
-                <h2 class="font-orbitron text-xl md:text-2xl mb-3">PRESENCE DETECTED:</h2>
+                <h2 class="font-orbitron text-xl md:text-2xl mb-3">PRÉSENCE DÉTECTÉE :</h2>
                 <div class="w-full bg-red-900/50 rounded-full h-8 md:h-10 border-2 border-red-500/50">
                     <div id="progressBar" class="bg-red-600 h-full rounded-full progress-bar-glow text-right pr-4 text-white font-bold text-lg flex items-center justify-end" style="width: 0%">
                         <span id="progressText">0%</span>
                     </div>
                 </div>
-                <p id="statusText" class="text-center mt-2 text-yellow-400 animate-pulse text-lg" style="text-shadow: 0 0 5px #facc15;">SYSTEM STATUS: Center appears empty... for now.</p>
+                <p id="statusText" class="text-center mt-2 text-yellow-400 animate-pulse text-lg" style="text-shadow: 0 0 5px #facc15;">STATUT SYSTÈME : Le centre semble vide... pour le moment.</p>
             </div>
 
             <!-- Activity Log Section -->
             <div>
-                <h2 class="font-orbitron text-xl md:text-2xl mb-3">> INTRUSION LOG_</h2>
+                <h2 class="font-orbitron text-xl md:text-2xl mb-3">> JOURNAL D'INTRUSION_</h2>
                 <div id="activityLog" class="h-64 md:h-80 overflow-y-auto bg-black/50 p-3 rounded-md border border-green-500/50 space-y-2">
                     <!-- Activity items will be injected here by JavaScript -->
-                    <p class="text-gray-500">Awaiting network traffic...</p>
+                    <p class="text-gray-500">En attente de trafic réseau...</p>
                 </div>
             </div>
         </main>
 
         <footer class="text-center mt-6 text-sm text-green-800">
-            <p>V-OS v3.14 | SECURE_CONNECTION [ESTABLISHED]</p>
+            <p>V-OS v3.14 | CONNEXION_SÉCURISÉE [ÉTABLIE]</p>
         </footer>
 
     </div>
@@ -142,13 +142,13 @@
 
             // Update Status Text
             if (percentage < 30) {
-                statusText.textContent = "SYSTEM STATUS: Minimal energy signatures detected. Probably just squirrels.";
+                statusText.textContent = "STATUT SYSTÈME : Signatures énergétiques minimales détectées. Probablement juste des écureuils.";
             } else if (percentage < 70) {
-                statusText.textContent = "WARNING: Coordinated activity detected. Raising alert level.";
+                statusText.textContent = "AVERTISSEMENT : Activité coordonnée détectée. Augmentation du niveau d'alerte.";
             } else if (percentage < 100) {
-                statusText.textContent = "SYSTEM ALERT: Center is fully active! My plans are in jeopardy!";
+                statusText.textContent = "ALERTE SYSTÈME : Le centre est pleinement actif ! Mes plans sont en péril !";
             } else {
-                statusText.textContent = "!! INFILTRATION FAILED !! - They're back... and they're prepared.";
+                statusText.textContent = "!! ÉCHEC DE L'INFILTRATION !! - Ils sont de retour... et ils sont préparés.";
                 statusText.classList.remove('animate-pulse', 'text-yellow-400');
                 statusText.classList.add('text-red-500', 'font-bold', 'glitch');
             }
@@ -156,7 +156,7 @@
             // Update Activity Log
             activityLog.innerHTML = ''; // Clear the log
             if (activities.length === 0) {
-                 activityLog.innerHTML = '<p class="text-gray-500">Awaiting network traffic...</p>';
+                 activityLog.innerHTML = '<p class="text-gray-500">En attente de trafic réseau...</p>';
                  return;
             }
             activities.forEach(activity => {
@@ -164,10 +164,11 @@
                 const date = activity.timestamp.toDate();
                 const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 
-                logEntry.innerHTML = `[<span class="text-yellow-400">${timeString}</span>] <span class="text-cyan-400">${activity.group}</span> logged a new activity. Threat index increasing...`;
+                logEntry.innerHTML = `[<span class="text-yellow-400">${timeString}</span>] Le groupe <span class="text-cyan-400">${activity.group}</span> a enregistré une nouvelle activité. Indice de menace en hausse...`;
                 activityLog.appendChild(logEntry);
             });
         }
     </script>
 </body>
 </html>
+
