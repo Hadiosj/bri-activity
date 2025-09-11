@@ -50,49 +50,184 @@
             from { background-position: 0 0; }
             to { background-position: 0 -400px; }
         }
+
+        /* Intro Screen Styles */
+        .intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* background: linear-gradient(135deg, #1e3a8a, #3b82f6, #60a5fa); */
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: all 0.5s ease;
+        }
+
+        .intro-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .scout-logo {
+            max-width: 300px;
+            max-height: 300px;
+            width: 80%;
+            height: auto;
+            margin-bottom: 2rem;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+        }
+
+        .click-instruction {
+            color: white;
+            font-size: 1.2rem;
+            animation: pulse 2s infinite;
+            text-align: center;
+            padding: 0 2rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* Hacking Transition Styles */
+        .hack-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .hack-overlay.active {
+            opacity: 1;
+        }
+
+        .hack-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ff41;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.5rem;
+            text-align: center;
+            opacity: 0;
+        }
+
+        .hack-text.show {
+            opacity: 1;
+            animation: typewriter 2s steps(40) forwards, glitch-text 0.5s ease-in-out 2s;
+        }
+
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes glitch-text {
+            0%, 100% { transform: translate(-50%, -50%); }
+            20% { transform: translate(-48%, -50%) skew(2deg); }
+            40% { transform: translate(-52%, -50%) skew(-2deg); }
+            60% { transform: translate(-50%, -48%); }
+            80% { transform: translate(-50%, -52%); }
+        }
+
+        .matrix-rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .matrix-rain.show {
+            opacity: 0.3;
+        }
+
+        .main-interface {
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .main-interface.show {
+            opacity: 1;
+        }
     </style>
 </head>
-<body class="p-4 md:p-8 relative overflow-hidden">
-    <div class="scanline"></div>
-    <div class="max-w-4xl mx-auto">
-        
-        <!-- Header -->
-        <header class="text-center mb-8">
-            <h1 class="font-orbitron text-3xl md:text-5xl lg:text-6xl text-red-500 glitch" style="text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;">[X SCOUT AM X]</h1>
-            <p class="text-lg text-red-400" style="text-shadow: 0 0 5px #ff0000;">Moniteur d'Activité Scout - Secteur AG - 93100</p>
-        </header>
-
-        <!-- Main Content -->
-        <main class="container-glow rounded-lg p-4 md:p-6 space-y-6">
-
-            <!-- Progress Section -->
-            <div>
-                <h2 class="font-orbitron text-xl md:text-2xl mb-3">PRÉSENCE DÉTECTÉE :</h2>
-                <div class="w-full bg-red-900/50 rounded-full h-8 md:h-10 border-2 border-red-500/50">
-                    <div id="progressBar" class="bg-red-600 h-full rounded-full progress-bar-glow text-right pr-4 text-white font-bold text-lg flex items-center justify-end" style="width: 0%">
-                        <span id="progressText">0%</span>
-                    </div>
-                </div>
-                <p id="statusText" class="text-center mt-2 text-yellow-400 animate-pulse text-lg" style="text-shadow: 0 0 5px #facc15;">STATUT SYSTÈME : Le centre semble vide... pour le moment.</p>
-            </div>
-
-            <!-- Activity Log Section -->
-            <div>
-                <h2 class="font-orbitron text-xl md:text-2xl mb-3">> JOURNAL D'INTRUSION_</h2>
-                <div id="activityLog" class="h-64 md:h-80 overflow-y-auto bg-black/50 p-3 rounded-md border border-green-500/50 space-y-2">
-                    <!-- Activity items will be injected here by JavaScript -->
-                    <p class="text-gray-500">En attente de trafic réseau...</p>
-                </div>
-            </div>
-        </main>
-
-        <footer class="text-center mt-6 text-sm text-green-800">
-            <p>V-OS v3.14 | CONNEXION_SÉCURISÉE [ÉTABLIE]</p>
-        </footer>
-
+<body class="relative overflow-hidden">
+    
+    <!-- Intro Screen -->
+    <div id="introScreen" class="intro-screen">
+         <img id="scoutLogo" class="scout-logo" src="https://github.com/Hadiosj/bri-activity/blob/master/logo_scout.jpg?raw=true" alt="Scout Logo" />
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- Hacking Transition Overlay -->
+    <div id="hackOverlay" class="hack-overlay">
+        <canvas id="matrixCanvas" class="matrix-rain"></canvas>
+        <div id="hackText" class="hack-text">
+            <div>ACCÈS REFUSÉ</div>
+            <div>TENTATIVE DE CONTOURNEMENT...</div>
+            <div>FIREWALL DÉSACTIVÉ</div>
+            <div>INTRUSION EN COURS...</div>
+            <div>ACCÈS ACCORDÉ</div>
+        </div>
+    </div>
+
+    <!-- Main Interface (initially hidden) -->
+    <div id="mainInterface" class="main-interface p-4 md:p-8 relative">
+        <div class="scanline"></div>
+        <div class="max-w-4xl mx-auto">
+            
+            <!-- Header -->
+            <header class="text-center mb-8">
+                <h1 class="font-orbitron text-3xl md:text-5xl lg:text-6xl text-red-500 glitch" style="text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;">[X SCOUT AM X]</h1>
+                <p class="text-lg text-red-400" style="text-shadow: 0 0 5px #ff0000;">Moniteur d'Activité Scout - Secteur AG - 93100</p>
+            </header>
+
+            <!-- Main Content -->
+            <main class="container-glow rounded-lg p-4 md:p-6 space-y-6">
+
+                <!-- Progress Section -->
+                <div>
+                    <h2 class="font-orbitron text-xl md:text-2xl mb-3">PRÉSENCE DÉTECTÉE :</h2>
+                    <div class="w-full bg-red-900/50 rounded-full h-8 md:h-10 border-2 border-red-500/50">
+                        <div id="progressBar" class="bg-red-600 h-full rounded-full progress-bar-glow text-right pr-4 text-white font-bold text-lg flex items-center justify-end" style="width: 0%">
+                            <span id="progressText">0%</span>
+                        </div>
+                    </div>
+                    <p id="statusText" class="text-center mt-2 text-yellow-400 animate-pulse text-lg" style="text-shadow: 0 0 5px #facc15;">STATUT SYSTÈME : Le centre semble vide... pour le moment.</p>
+                </div>
+
+                <!-- Activity Log Section -->
+                <div>
+                    <h2 class="font-orbitron text-xl md:text-2xl mb-3">> JOURNAL D'INTRUSION_</h2>
+                    <div id="activityLog" class="h-64 md:h-80 overflow-y-auto bg-black/50 p-3 rounded-md border border-green-500/50 space-y-2">
+                        <!-- Activity items will be injected here by JavaScript -->
+                        <p class="text-gray-500">En attente de trafic réseau...</p>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="text-center mt-6 text-sm text-green-800">
+                <p>V-OS v3.14 | CONNEXION_SÉCURISÉE [ÉTABLIE]</p>
+            </footer>
+
+        </div>
+    </div>
+
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -113,12 +248,86 @@
         const db = getFirestore(app);
 
         // DOM Elements
+        const introScreen = document.getElementById('introScreen');
+        const hackOverlay = document.getElementById('hackOverlay');
+        const mainInterface = document.getElementById('mainInterface');
         const progressBar = document.getElementById('progressBar');
         const progressText = document.getElementById('progressText');
         const statusText = document.getElementById('statusText');
         const activityLog = document.getElementById('activityLog');
+        const hackText = document.getElementById('hackText');
+        const matrixCanvas = document.getElementById('matrixCanvas');
 
         const TOTAL_ACTIVITIES_GOAL = 20; // <--- SET YOUR GOAL FOR THE DAY HERE
+
+        // Matrix Rain Effect
+        function createMatrixRain() {
+            const ctx = matrixCanvas.getContext('2d');
+            matrixCanvas.width = window.innerWidth;
+            matrixCanvas.height = window.innerHeight;
+
+            const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
+            const matrixArray = matrix.split("");
+
+            const fontSize = 10;
+            const columns = matrixCanvas.width / fontSize;
+
+            const drops = [];
+            for (let x = 0; x < columns; x++) {
+                drops[x] = 1;
+            }
+
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+                ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+
+                ctx.fillStyle = '#00ff41';
+                ctx.font = fontSize + 'px arial';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                    if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            return setInterval(draw, 35);
+        }
+
+        // Hacking Transition
+        function startHackingTransition() {
+            hackOverlay.classList.add('active');
+            
+            // Start matrix rain
+            const matrixInterval = createMatrixRain();
+            setTimeout(() => {
+                matrixCanvas.classList.add('show');
+            }, 450);
+
+            // Show hacking text with typewriter effect
+            setTimeout(() => {
+                hackText.classList.add('show');
+            }, 1200);
+
+            // Transition to main interface
+            setTimeout(() => {
+                hackOverlay.classList.remove('active');
+                mainInterface.classList.add('show');
+                clearInterval(matrixInterval);
+            }, 6000);
+        }
+
+        // Click handler for intro screen
+        introScreen.addEventListener('click', () => {
+            introScreen.classList.add('hidden');
+            setTimeout(() => {
+                startHackingTransition();
+            }, 500);
+        });
 
         // Real-time listener for activities
         const q = query(collection(db, "activities"), orderBy("timestamp", "desc"));
@@ -168,7 +377,14 @@
                 activityLog.appendChild(logEntry);
             });
         }
+
+        // Handle window resize for matrix effect
+        window.addEventListener('resize', () => {
+            if (matrixCanvas.getContext) {
+                matrixCanvas.width = window.innerWidth;
+                matrixCanvas.height = window.innerHeight;
+            }
+        });
     </script>
 </body>
 </html>
-
