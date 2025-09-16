@@ -178,7 +178,7 @@
     
     <!-- Intro Screen -->
     <div id="introScreen" class="intro-screen">
-         <img id="scoutLogo" class="scout-logo" src="https://github.com/Hadiosj/bri-activity/blob/master/logo_scout.jpg?raw=true" alt="Scout Logo" />
+        <img id="scoutLogo" class="scout-logo" src="https://github.com/Hadiosj/bri-activity/blob/master/logo_scout.jpg?raw=true" alt="Scout Logo"/>
     </div>
 
     <!-- Hacking Transition Overlay -->
@@ -232,6 +232,18 @@
                 <p>V-OS v3.14 | CONNEXION_SÉCURISÉE [ÉTABLIE]</p>
             </footer>
 
+        </div>
+    </div>
+
+    <div id="villainHpInterface" class="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-90 z-[1001]" style="display:none;">
+        <h2 class="font-orbitron text-4xl text-red-600 mb-6 glitch" style="text-shadow:0 0 10px #ff0000;">LE VILLAIN REFUSE DE PARTIR !</h2>
+        <div class="w-full max-w-lg bg-gray-800 rounded-lg p-8 shadow-lg flex flex-col items-center">
+            <div class="w-full bg-red-900/50 rounded-full h-10 border-2 border-red-500/50 mb-4">
+                <div id="villainHpBar" class="bg-red-600 h-full rounded-full progress-bar-glow flex items-center justify-end pr-4 text-white font-bold text-lg" style="width: 100%;">
+                    <span id="villainHpText">100%</span>
+                </div>
+            </div>
+            <p class="text-yellow-400 text-lg text-center" id="villainHpStatus">PV du villain : 100%</p>
         </div>
     </div>
 
@@ -314,7 +326,7 @@
                     steps[i].style.display = 'block';
                     steps[i].classList.add('show');
                     i++;
-                    setTimeout(showNext, 1600); // Adjust delay as needed
+                    setTimeout(showNext, 3200); // Adjust delay as needed
                 }
             }
             showNext();
@@ -324,41 +336,20 @@
             const matrixInterval = createMatrixRain();
             setTimeout(() => {
                 matrixCanvas.classList.add('show');
-            }, 900);
+            }, 1350);
 
             // Show hacking steps one by one
             setTimeout(() => {
                 hackText.classList.add('show');
                 showHackSteps();
-            }, 2400);
+            }, 3600);
 
             setTimeout(() => {
                 hackOverlay.classList.remove('active');
                 mainInterface.classList.add('show');
                 clearInterval(matrixInterval);
-            }, 12000);
+            }, 18000);
         }
-        // function startHackingTransition() {
-        //     hackOverlay.classList.add('active');
-            
-        //     // Start matrix rain
-        //     const matrixInterval = createMatrixRain();
-        //     setTimeout(() => {
-        //         matrixCanvas.classList.add('show');
-        //     }, 450);
-
-        //     // Show hacking text with typewriter effect
-        //     setTimeout(() => {
-        //         hackText.classList.add('show');
-        //     }, 1200);
-
-        //     // Transition to main interface
-        //     setTimeout(() => {
-        //         hackOverlay.classList.remove('active');
-        //         mainInterface.classList.add('show');
-        //         clearInterval(matrixInterval);
-        //     }, 6000);
-        // }
 
         // Click handler for intro screen
         introScreen.addEventListener('click', () => {
@@ -380,11 +371,59 @@
             updateUI(activities);
         });
 
+        let villainHp = 100;
+        const villainHpInterface = document.getElementById('villainHpInterface');
+        const villainHpBar = document.getElementById('villainHpBar');
+        const villainHpText = document.getElementById('villainHpText');
+        const villainHpStatus = document.getElementById('villainHpStatus');
+
+        // Listen for HP changes in Firestore
+        const hpQuery = query(collection(db, "villain_hp"), orderBy("timestamp", "desc"),);
+        onSnapshot(hpQuery, (querySnapshot) => {
+            let hp = 100;
+            const docs = querySnapshot.docs;
+            if (docs.length > 0) {
+                const data = docs[0].data();
+                if (typeof data.hp === 'number') {
+                    hp = data.hp;
+                }
+            }
+            villainHp = hp;
+            updateVillainHpUI();
+        });
+
+        function updateVillainHpUI() {
+            villainHpBar.style.width = villainHp + '%';
+            villainHpText.textContent = Math.round(villainHp) + '%';
+            villainHpStatus.textContent = 'PV du villain : ' + Math.round(villainHp) + '%';
+            if (villainHp <= 0) {
+                villainHpStatus.textContent = 'Le villain a fui ! Bravo les scouts !';
+                villainHpBar.classList.remove('bg-red-600');
+                villainHpBar.classList.add('bg-green-600');
+            } else {
+                villainHpBar.classList.add('bg-red-600');
+                villainHpBar.classList.remove('bg-green-600');
+            }
+        }
+
+        // Show villain HP interface when progress reaches 100%
+        function checkShowVillainHp(percentage) {
+            if (percentage >= 100) {
+                villainHpInterface.style.display = 'flex';
+                mainInterface.style.display = 'none';
+            } else {
+                villainHpInterface.style.display = 'none';
+                mainInterface.style.display = '';
+            }
+        }
+
         function updateUI(activities) {
-            // Update Progress Bar
-            const activityCount = activities.length;
-            let percentage = Math.min(100, (activityCount / TOTAL_ACTIVITIES_GOAL) * 100);
-            
+            // Sum all percentages
+            let totalPercent = activities.reduce((sum, activity) => {
+                return sum + (activity.percent || (100 / TOTAL_ACTIVITIES_GOAL));
+            }, 0);
+            let percentage = Math.min(100, totalPercent);
+
             progressBar.style.width = percentage + '%';
             progressText.textContent = Math.round(percentage) + '%';
 
@@ -415,6 +454,8 @@
                 logEntry.innerHTML = `[<span class="text-yellow-400">${timeString}</span>] Le groupe <span class="text-cyan-400">${activity.group}</span> a enregistré une nouvelle activité. Indice de menace en hausse...`;
                 activityLog.appendChild(logEntry);
             });
+
+            checkShowVillainHp(percentage);
         }
 
         // Handle window resize for matrix effect

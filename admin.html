@@ -12,17 +12,16 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
-
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
     <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
         <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">Scout Activity Logger</h1>
         <p class="text-center text-gray-500 mb-6">Log a completed activity for a group.</p>
-        
+
+        <!-- Scout Activity Logger Section -->
         <div class="space-y-4">
             <div>
                 <label for="scoutGroup" class="block text-sm font-medium text-gray-700">Select Group:</label>
                 <select id="scoutGroup" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                    <!-- ADD YOUR SCOUT GROUP NAMES HERE -->
                     <option>Louveteaux</option>
                     <option>Louvettes</option>
                     <option>Lionceaux</option>
@@ -33,21 +32,47 @@
                     <option>Partisanes</option>
                 </select>
             </div>
-            
+            <div>
+                <label for="activityPercent" class="block text-sm font-medium text-gray-700">Activity Percentage:</label>
+                <input type="number" id="activityPercent" min="1" max="100" value="5"
+                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                    placeholder="Enter percentage for this activity">
+            </div>
             <button id="logButton" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-150">
                 Log Activity
             </button>
+            <div id="feedbackMessage" class="mt-2 text-center text-green-600 font-medium min-h-[20px]"></div>
         </div>
-`
-        <div id="feedbackMessage" class="mt-4 text-center text-green-600 font-medium h-5"></div>
+
+        <!-- Villain HP Control Section -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <h2 class="text-xl font-bold text-center text-red-600 mb-2">Villain HP Control</h2>
+            <p class="text-center text-gray-500 mb-4">Decrease villain's HP by a percentage.</p>
+            <div class="flex space-x-2 items-center justify-center mb-4">
+                <input type="number" id="villainHpDecrease" min="1" max="100" value="10"
+                    class="block w-24 pl-3 pr-2 py-2 text-base border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md"
+                    placeholder="PV à soustraire">
+                <button id="decreaseHpButton" class="py-2 px-4 rounded-md bg-red-600 text-white font-bold hover:bg-red-700 transition-all">Soustraire PV</button>
+            </div>
+            <div id="villainHpFeedback" class="text-center text-green-600 font-medium min-h-[20px]"></div>
+        </div>
+
+        <!-- Reset All Section -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <div class="flex justify-center">
+                <button id="resetAllButton" class="py-2 px-4 rounded-md bg-gray-700 text-white font-bold hover:bg-gray-900 transition-all">
+                    Réinitialiser toutes les données
+                </button>
+            </div>
+            <div id="resetAllFeedback" class="text-center text-red-600 font-medium min-h-[20px] mt-2"></div>
+        </div>
     </div>
 
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, getDocs, limit, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBAwOJf4BzFPAvFsghjS90_J5I3YWhyA8A",
             authDomain: "scout-bri.firebaseapp.com",
@@ -57,7 +82,6 @@
             appId: "1:98896308443:web:c6e7b7a0a420aede15c4fe"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
@@ -65,47 +89,117 @@
         const logButton = document.getElementById('logButton');
         const scoutGroupSelect = document.getElementById('scoutGroup');
         const feedbackMessage = document.getElementById('feedbackMessage');
+        const activityPercentInput = document.getElementById('activityPercent');
+        const villainHpDecreaseInput = document.getElementById('villainHpDecrease');
+        const decreaseHpButton = document.getElementById('decreaseHpButton');
+        const villainHpFeedback = document.getElementById('villainHpFeedback');
+        const resetAllButton = document.getElementById('resetAllButton');
+        const resetAllFeedback = document.getElementById('resetAllFeedback');
 
+        // Log Activity
         logButton.addEventListener('click', async () => {
             const groupName = scoutGroupSelect.value;
-            if (!groupName) {
-                alert("Please select a group!");
+            const percentValue = parseInt(activityPercentInput.value, 10);
+
+            if (!groupName || isNaN(percentValue) || percentValue < 1 || percentValue > 100) {
+                feedbackMessage.textContent = "Please select a group and enter a valid percentage (1-100)!";
+                feedbackMessage.classList.remove('text-green-600');
+                feedbackMessage.classList.add('text-red-600');
+                setTimeout(() => { feedbackMessage.textContent = ''; }, 3000);
                 return;
             }
 
             try {
-                // Disable button to prevent multiple clicks
                 logButton.disabled = true;
                 logButton.textContent = 'Logging...';
-
-                // Add a new document with a generated id.
-                const docRef = await addDoc(collection(db, "activities"), {
+                await addDoc(collection(db, "activities"), {
                     group: groupName,
-                    timestamp: serverTimestamp() // Use server's timestamp for accuracy
+                    percent: percentValue,
+                    timestamp: serverTimestamp()
                 });
-                
-                console.log("Document written with ID: ", docRef.id);
-                
-                // Show success feedback
-                feedbackMessage.textContent = `Activity logged for ${groupName}!`;
-                setTimeout(() => {
-                    feedbackMessage.textContent = '';
-                }, 3000);
-
+                feedbackMessage.textContent = `Activity logged for ${groupName} (${percentValue}%)!`;
+                setTimeout(() => { feedbackMessage.textContent = ''; }, 3000);
             } catch (e) {
                 console.error("Error adding document: ", e);
                 feedbackMessage.textContent = 'Error logging activity.';
                 feedbackMessage.classList.remove('text-green-600');
                 feedbackMessage.classList.add('text-red-600');
-                 setTimeout(() => {
-                    feedbackMessage.textContent = '';
-                    feedbackMessage.classList.remove('text-red-600');
-                    feedbackMessage.classList.add('text-green-600');
-                }, 3000);
+                setTimeout(() => { feedbackMessage.textContent = ''; }, 3000);
             } finally {
-                // Re-enable button
                 logButton.disabled = false;
                 logButton.textContent = 'Log Activity';
+            }
+        });
+
+        // Villain HP Control
+        decreaseHpButton.addEventListener('click', async () => {
+            const decreaseValue = parseInt(villainHpDecreaseInput.value, 10);
+
+            if (isNaN(decreaseValue) || decreaseValue < 1 || decreaseValue > 100) {
+                villainHpFeedback.textContent = "Entrez une valeur de PV à soustraire (1-100)";
+                villainHpFeedback.classList.remove('text-green-600');
+                villainHpFeedback.classList.add('text-red-600');
+                setTimeout(() => { villainHpFeedback.textContent = ''; }, 3000);
+                return;
+            }
+
+            try {
+                decreaseHpButton.disabled = true;
+                // Get latest HP from Firestore
+                let latestHp = 100;
+                const hpSnapshot = await getDocs(
+                    query(
+                        collection(db, "villain_hp"),
+                        orderBy("timestamp", "desc"),
+                        limit(1)
+                    )
+                );
+                hpSnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (typeof data.hp === 'number') {
+                        latestHp = data.hp;
+                    }
+                });
+
+                let newHp = Math.max(0, latestHp - decreaseValue);
+                await addDoc(collection(db, "villain_hp"), {
+                    hp: newHp,
+                    timestamp: serverTimestamp()
+                });
+                villainHpFeedback.textContent = `PV du villain mis à jour : ${newHp}%`;
+                setTimeout(() => { villainHpFeedback.textContent = ''; }, 3000);
+            } catch (e) {
+                villainHpFeedback.textContent = 'Erreur lors de la mise à jour des PV.';
+                villainHpFeedback.classList.remove('text-green-600');
+                villainHpFeedback.classList.add('text-red-600');
+                setTimeout(() => { villainHpFeedback.textContent = ''; }, 3000);
+            } finally {
+                decreaseHpButton.disabled = false;
+            }
+        });
+
+        // Reset All Data
+        resetAllButton.addEventListener('click', async () => {
+            if (!confirm('Êtes-vous sûr de vouloir tout réinitialiser ?')) return;
+
+            resetAllButton.disabled = true;
+            resetAllFeedback.textContent = 'Réinitialisation en cours...';
+
+            try {
+                const batch = writeBatch(db);
+                const activitiesSnap = await getDocs(collection(db, "activities"));
+                const villainHpSnap = await getDocs(collection(db, "villain_hp"));
+
+                activitiesSnap.forEach(doc => batch.delete(doc.ref));
+                villainHpSnap.forEach(doc => batch.delete(doc.ref));
+
+                await batch.commit();
+                resetAllFeedback.textContent = 'Toutes les données ont été réinitialisées !';
+                setTimeout(() => { resetAllFeedback.textContent = ''; }, 3000);
+            } catch (e) {
+                resetAllFeedback.textContent = 'Erreur lors de la réinitialisation.';
+            } finally {
+                resetAllButton.disabled = false;
             }
         });
     </script>
