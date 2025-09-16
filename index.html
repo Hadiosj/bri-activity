@@ -30,6 +30,13 @@
         .glitch {
             animation: glitch 1.5s linear infinite;
         }
+        .hack-step {
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .hack-step.show {
+            opacity: 1;
+        }
         @keyframes glitch {
             2%, 64% { transform: translate(2px, 0) skew(0deg); }
             4%, 60% { transform: translate(-2px, 0) skew(0deg); }
@@ -178,11 +185,11 @@
     <div id="hackOverlay" class="hack-overlay">
         <canvas id="matrixCanvas" class="matrix-rain"></canvas>
         <div id="hackText" class="hack-text">
-            <div>ACCÈS REFUSÉ</div>
-            <div>TENTATIVE DE CONTOURNEMENT...</div>
-            <div>FIREWALL DÉSACTIVÉ</div>
-            <div>INTRUSION EN COURS...</div>
-            <div>ACCÈS ACCORDÉ</div>
+            <div class="hack-step" style="font-size:2.5rem; display:none;">ACCÈS REFUSÉ</div>
+            <div class="hack-step" style="font-size:2.5rem; display:none;">TENTATIVE DE CONTOURNEMENT...</div>
+            <div class="hack-step" style="font-size:2.5rem; display:none;">FIREWALL DÉSACTIVÉ</div>
+            <div class="hack-step" style="font-size:2.5rem; display:none;">INTRUSION EN COURS...</div>
+            <div class="hack-step" style="font-size:2.5rem; display:none;">ACCÈS ACCORDÉ</div>
         </div>
     </div>
 
@@ -193,7 +200,7 @@
             
             <!-- Header -->
             <header class="text-center mb-8">
-                <h1 class="font-orbitron text-3xl md:text-5xl lg:text-6xl text-red-500 glitch" style="text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;">[X SCOUT AM X]</h1>
+                <h1 class="font-orbitron text-3xl md:text-5xl lg:text-6xl text-red-500 glitch" style="text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;">[SCOUT AM]</h1>
                 <p class="text-lg text-red-400" style="text-shadow: 0 0 5px #ff0000;">Moniteur d'Activité Scout - Secteur AG - 93100</p>
             </header>
 
@@ -299,27 +306,59 @@
         }
 
         // Hacking Transition
+        function showHackSteps() {
+            const steps = document.querySelectorAll('#hackText .hack-step');
+            let i = 0;
+            function showNext() {
+                if (i < steps.length) {
+                    steps[i].style.display = 'block';
+                    steps[i].classList.add('show');
+                    i++;
+                    setTimeout(showNext, 1600); // Adjust delay as needed
+                }
+            }
+            showNext();
+        }
         function startHackingTransition() {
             hackOverlay.classList.add('active');
-            
-            // Start matrix rain
             const matrixInterval = createMatrixRain();
             setTimeout(() => {
                 matrixCanvas.classList.add('show');
-            }, 450);
+            }, 900);
 
-            // Show hacking text with typewriter effect
+            // Show hacking steps one by one
             setTimeout(() => {
                 hackText.classList.add('show');
-            }, 1200);
+                showHackSteps();
+            }, 2400);
 
-            // Transition to main interface
             setTimeout(() => {
                 hackOverlay.classList.remove('active');
                 mainInterface.classList.add('show');
                 clearInterval(matrixInterval);
-            }, 6000);
+            }, 12000);
         }
+        // function startHackingTransition() {
+        //     hackOverlay.classList.add('active');
+            
+        //     // Start matrix rain
+        //     const matrixInterval = createMatrixRain();
+        //     setTimeout(() => {
+        //         matrixCanvas.classList.add('show');
+        //     }, 450);
+
+        //     // Show hacking text with typewriter effect
+        //     setTimeout(() => {
+        //         hackText.classList.add('show');
+        //     }, 1200);
+
+        //     // Transition to main interface
+        //     setTimeout(() => {
+        //         hackOverlay.classList.remove('active');
+        //         mainInterface.classList.add('show');
+        //         clearInterval(matrixInterval);
+        //     }, 6000);
+        // }
 
         // Click handler for intro screen
         introScreen.addEventListener('click', () => {
