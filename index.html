@@ -172,6 +172,33 @@
         .main-interface.show {
             opacity: 1;
         }
+
+        /* Side Images Styles */
+        .side-image {
+            max-height: 120px;
+            width: auto;
+            filter: drop-shadow(0 0 10px #00ff41);
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .side-image:hover {
+            filter: drop-shadow(0 0 15px #00ff41) drop-shadow(0 0 25px #00ff41);
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .side-image {
+                max-height: 80px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .side-image {
+                max-height: 60px;
+            }
+        }
     </style>
 </head>
 <body class="relative overflow-hidden">
@@ -187,9 +214,9 @@
         <div id="hackText" class="hack-text">
             <div class="hack-step" style="font-size:2.5rem; display:none;">ACCÈS REFUSÉ</div>
             <div class="hack-step" style="font-size:2.5rem; display:none;">TENTATIVE DE CONTOURNEMENT...</div>
-            <div class="hack-step" style="font-size:2.5rem; display:none;">FIREWALL DÉSACTIVÉ</div>
+            <div class="hack-step" style="font-size:2.5rem; display:none;">FIREWALL DÉSACTIVÉ...</div>
             <div class="hack-step" style="font-size:2.5rem; display:none;">INTRUSION EN COURS...</div>
-            <div class="hack-step" style="font-size:2.5rem; display:none;">ACCÈS ACCORDÉ</div>
+            <div class="hack-step" style="font-size:2.5rem; display:none;">ACCÈS ACCORDÉ!!!</div>
         </div>
     </div>
 
@@ -207,12 +234,31 @@
             <!-- Main Content -->
             <main class="container-glow rounded-lg p-4 md:p-6 space-y-6">
 
-                <!-- Progress Section -->
+                <!-- Progress Section with Side Images -->
                 <div>
                     <h2 class="font-orbitron text-xl md:text-2xl mb-3">PRÉSENCE DÉTECTÉE :</h2>
-                    <div class="w-full bg-red-900/50 rounded-full h-8 md:h-10 border-2 border-red-500/50">
-                        <div id="progressBar" class="bg-red-600 h-full rounded-full progress-bar-glow text-right pr-4 text-white font-bold text-lg flex items-center justify-end" style="width: 0%">
-                            <span id="progressText">0%</span>
+                    <div class="flex items-center gap-4 md:gap-8">
+                        <!-- Left Image -->
+                        <div class="flex-shrink-0">
+                            <img src="https://github.com/Hadiosj/bri-activity/blob/master/paris_scout_germain.png?raw=true" 
+                                 alt="Left Image" 
+                                 class="side-image">
+                        </div>
+                        
+                        <!-- Progress Bar Container -->
+                        <div class="flex-1">
+                            <div class="w-full bg-red-900/50 rounded-full h-8 md:h-10 border-2 border-red-500/50">
+                                <div id="progressBar" class="bg-red-600 h-full rounded-full progress-bar-glow text-right pr-4 text-white font-bold text-lg flex items-center justify-end" style="width: 0%">
+                                    <span id="progressText">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Image -->
+                        <div class="flex-shrink-0">
+                            <img src="https://github.com/Hadiosj/bri-activity/blob/master/paris_scout_germain.png?raw=true" 
+                                 alt="Right Image" 
+                                 class="side-image">
                         </div>
                     </div>
                     <p id="statusText" class="text-center mt-2 text-yellow-400 animate-pulse text-lg" style="text-shadow: 0 0 5px #facc15;">STATUT SYSTÈME : Le centre semble vide... pour le moment.</p>
@@ -326,7 +372,7 @@
                     steps[i].style.display = 'block';
                     steps[i].classList.add('show');
                     i++;
-                    setTimeout(showNext, 3200); // Adjust delay as needed
+                    setTimeout(showNext, 4800); // Adjust delay as needed
                 }
             }
             showNext();
@@ -336,19 +382,19 @@
             const matrixInterval = createMatrixRain();
             setTimeout(() => {
                 matrixCanvas.classList.add('show');
-            }, 1350);
+            }, 2025);
 
             // Show hacking steps one by one
             setTimeout(() => {
                 hackText.classList.add('show');
                 showHackSteps();
-            }, 3600);
+            }, 5400);
 
             setTimeout(() => {
                 hackOverlay.classList.remove('active');
                 mainInterface.classList.add('show');
                 clearInterval(matrixInterval);
-            }, 18000);
+            }, 27000);
         }
 
         // Click handler for intro screen
