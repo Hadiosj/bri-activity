@@ -175,28 +175,34 @@
 
         /* Side Images Styles */
         .side-image {
-            max-height: 120px;
+            max-height: 400px;
             width: auto;
-            filter: drop-shadow(0 0 10px #00ff41);
-            opacity: 0.8;
+            filter: drop-shadow(0 0 15px #00ff41);
+            opacity: 0.9;
             transition: all 0.3s ease;
         }
 
         .side-image:hover {
-            filter: drop-shadow(0 0 15px #00ff41) drop-shadow(0 0 25px #00ff41);
+            filter: drop-shadow(0 0 20px #00ff41) drop-shadow(0 0 35px #00ff41);
             opacity: 1;
-            transform: scale(1.05);
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 1024px) {
+            .side-image {
+                max-height: 300px;
+            }
         }
 
         @media (max-width: 768px) {
             .side-image {
-                max-height: 80px;
+                max-height: 200px;
             }
         }
 
         @media (max-width: 640px) {
             .side-image {
-                max-height: 60px;
+                max-height: 180px;
             }
         }
     </style>
@@ -223,7 +229,7 @@
     <!-- Main Interface (initially hidden) -->
     <div id="mainInterface" class="main-interface p-4 md:p-8 relative">
         <div class="scanline"></div>
-        <div class="max-w-4xl mx-auto">
+        <div class="max-w-none mx-auto px-4 md:px-8">
             
             <!-- Header -->
             <header class="text-center mb-8">
@@ -231,48 +237,45 @@
                 <p class="text-lg text-red-400" style="text-shadow: 0 0 5px #ff0000;">Moniteur d'Activité Scout - Secteur AG - 93100</p>
             </header>
 
-            <!-- Main Content -->
-            <main class="container-glow rounded-lg p-4 md:p-6 space-y-6">
-
-                <!-- Progress Section with Side Images -->
-                <div>
-                    <h2 class="font-orbitron text-xl md:text-2xl mb-3">PRÉSENCE DÉTECTÉE :</h2>
-                    <div class="flex items-center gap-4 md:gap-8">
-                        <!-- Left Image -->
-                        <div class="flex-shrink-0">
-                            <img src="https://github.com/Hadiosj/bri-activity/blob/master/paris_scout_germain.png?raw=true" 
-                                 alt="Left Image" 
-                                 class="side-image">
-                        </div>
-                        
-                        <!-- Progress Bar Container -->
-                        <div class="flex-1">
-                            <div class="w-full bg-red-900/50 rounded-full h-8 md:h-10 border-2 border-red-500/50">
-                                <div id="progressBar" class="bg-red-600 h-full rounded-full progress-bar-glow text-right pr-4 text-white font-bold text-lg flex items-center justify-end" style="width: 0%">
-                                    <span id="progressText">0%</span>
-                                </div>
+            <!-- Progress Section with Side Images (3-column layout) -->
+            <div class="flex items-center gap-6 md:gap-12 lg:gap-16 xl:gap-20 mb-6">
+                <!-- Left Image (Outside) -->
+                <div class="flex-shrink-0">
+                    <img src="https://github.com/Hadiosj/bri-activity/blob/master/paris_scout_germain.png?raw=true" 
+                         alt="Left Image" 
+                         class="side-image">
+                </div>
+                
+                <!-- Main Content (Slightly smaller to emphasize images) -->
+                <main class="container-glow rounded-lg p-4 md:p-5 lg:p-6 space-y-4 md:space-y-5 lg:space-y-6 flex-1 min-w-0 max-w-5xl mx-auto">
+                    <!-- Progress Section -->
+                    <div>
+                        <h2 class="font-orbitron text-xl md:text-2xl lg:text-3xl mb-3">PRÉSENCE DÉTECTÉE :</h2>
+                        <div class="w-full bg-red-900/50 rounded-full h-8 md:h-10 lg:h-12 border-2 border-red-500/50">
+                            <div id="progressBar" class="bg-red-600 h-full rounded-full progress-bar-glow text-right pr-4 text-white font-bold text-lg flex items-center justify-end" style="width: 0%">
+                                <span id="progressText">0%</span>
                             </div>
                         </div>
-                        
-                        <!-- Right Image -->
-                        <div class="flex-shrink-0">
-                            <img src="https://github.com/Hadiosj/bri-activity/blob/master/paris_scout_germain.png?raw=true" 
-                                 alt="Right Image" 
-                                 class="side-image">
+                        <p id="statusText" class="text-center mt-2 text-yellow-400 animate-pulse text-lg lg:text-xl" style="text-shadow: 0 0 5px #facc15;">STATUT SYSTÈME : Le centre semble vide... pour le moment.</p>
+                    </div>
+
+                    <!-- Activity Log Section -->
+                    <div>
+                        <h2 class="font-orbitron text-xl md:text-2xl lg:text-3xl mb-3">> JOURNAL D'INTRUSION_</h2>
+                        <div id="activityLog" class="h-56 md:h-72 lg:h-80 overflow-y-auto bg-black/50 p-3 lg:p-4 rounded-md border border-green-500/50 space-y-2">
+                            <!-- Activity items will be injected here by JavaScript -->
+                            <p class="text-gray-500">En attente de trafic réseau...</p>
                         </div>
                     </div>
-                    <p id="statusText" class="text-center mt-2 text-yellow-400 animate-pulse text-lg" style="text-shadow: 0 0 5px #facc15;">STATUT SYSTÈME : Le centre semble vide... pour le moment.</p>
+                </main>
+                
+                <!-- Right Image (Outside) -->
+                <div class="flex-shrink-0">
+                    <img src="https://github.com/Hadiosj/bri-activity/blob/master/paris_scout_germain.png?raw=true" 
+                         alt="Right Image" 
+                         class="side-image">
                 </div>
-
-                <!-- Activity Log Section -->
-                <div>
-                    <h2 class="font-orbitron text-xl md:text-2xl mb-3">> JOURNAL D'INTRUSION_</h2>
-                    <div id="activityLog" class="h-64 md:h-80 overflow-y-auto bg-black/50 p-3 rounded-md border border-green-500/50 space-y-2">
-                        <!-- Activity items will be injected here by JavaScript -->
-                        <p class="text-gray-500">En attente de trafic réseau...</p>
-                    </div>
-                </div>
-            </main>
+            </div>
 
             <footer class="text-center mt-6 text-sm text-green-800">
                 <p>V-OS v3.14 | CONNEXION_SÉCURISÉE [ÉTABLIE]</p>
